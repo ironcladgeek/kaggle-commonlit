@@ -15,6 +15,10 @@ class NaiveFeatures:
     def _num_words(text):
         return textstat.lexicon_count(text)
 
+    @staticmethod
+    def _num_digits(text):
+        return sum(c.isnumeric() for c in text)
+
     def _num_sentences(self, text):
         doc = self.nlp(text)
         return sum([1 for sent in doc.sents])
@@ -55,16 +59,16 @@ class NaiveFeatures:
                  avg_sentences_len=True,
                  num_sentences=True,
                  num_words=True,
+                 num_digits=True,
                  avg_num_words_per_sentence=True,
                  avg_words_len=True,
                  avg_num_syllables_per_word=True,
-                 avg_num_complex_words_per_sentence=True,
-                 avg_words_frequency=True,
                  flesch_reading_ease=True,
                  flesch_kincaid_grade=True,
                  automated_readability_index=True,
                  dale_chall_readability_score=True):
 
+        # asserts
         assert type(dataset) == pd.core.frame.DataFrame
         assert type(text_col_name) == str
         assert text_col_name in dataset.columns
@@ -83,6 +87,9 @@ class NaiveFeatures:
         if num_words:
             print('\nCalculating number of words ...')
             df['num_words'] = df[text_col_name].progress_apply(lambda x: self._num_words(x))
+        if num_digits:
+            print('\nCalculating number of digits ...')
+            df['num_digits'] = df[text_col_name].progress_apply(lambda x: self._num_digits(x))
         if avg_num_words_per_sentence:
             print('\nCalculating average number of words per sentence ...')
             df['avg_num_words_per_sentence'] = df[text_col_name].progress_apply(lambda x: self._avg_num_words_per_sentence(x))
@@ -92,12 +99,6 @@ class NaiveFeatures:
         if avg_num_syllables_per_word:
             print('\nCalculating average number of syllables per word ...')
             df['avg_num_syllables_per_word'] = df[text_col_name].progress_apply(lambda x: self._avg_num_syllables_per_word(x))
-        if avg_num_complex_words_per_sentence:
-            # TODO
-            pass
-        if avg_words_frequency:
-            # TODO
-            pass
         if flesch_reading_ease:
             print('\nCalculating flesch reading ease score ...')
             df['flesch_reading_ease']= df[text_col_name].progress_apply(lambda x: self._flesch_reading(x))
